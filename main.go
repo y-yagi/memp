@@ -30,8 +30,8 @@ func main() {
 		}
 
 		memory, _ := process.Memory()
-		rsses[info.Name] += memory.Resident
-		vszs[info.Name] += memory.Virtual
+		rsses[info.Exe] += memory.Resident
+		vszs[info.Exe] += memory.Virtual
 	}
 
 	sortedProcesses := []process{}
