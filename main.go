@@ -10,8 +10,9 @@ import (
 )
 
 type process struct {
-	name   string
-	memory uint64
+	name string
+	rss  uint64
+	vsz  uint64
 }
 
 func main() {
@@ -20,7 +21,8 @@ func main() {
 		panic(err)
 	}
 
-	memories := map[string]uint64{}
+	rsses := map[string]uint64{}
+	vszs := map[string]uint64{}
 	for _, process := range processes {
 		info, _ := process.Info()
 		if len(info.Name) == 0 {
@@ -28,23 +30,24 @@ func main() {
 		}
 
 		memory, _ := process.Memory()
-		memories[info.Name] += memory.Resident
+		rsses[info.Name] += memory.Resident
+		vszs[info.Name] += memory.Virtual
 	}
 
 	sortedProcesses := []process{}
-	for k, v := range memories {
+	for k, v := range rsses {
 		if len(k) != 0 {
-			sortedProcesses = append(sortedProcesses, process{name: k, memory: v})
+			sortedProcesses = append(sortedProcesses, process{name: k, rss: v, vsz: vszs[k]})
 		}
 	}
 
 	sort.Slice(sortedProcesses, func(i, j int) bool {
-		return sortedProcesses[i].memory > sortedProcesses[j].memory
+		return sortedProcesses[i].rss > sortedProcesses[j].rss
 	})
 
 	green := color.New(color.FgGreen, color.Bold).SprintFunc()
 	bold := color.New(color.Bold).SprintFunc()
 	for _, process := range sortedProcesses {
-		fmt.Printf("%v %v\n", green(process.name), bold(bytefmt.ByteSize(process.memory)))
+		fmt.Printf("%v %v %v\n", green(process.name), bold(bytefmt.ByteSize(process.rss)), bold(bytefmt.ByteSize(process.vsz)))
 	}
 }
