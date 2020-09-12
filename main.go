@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sort"
 
 	"code.cloudfoundry.org/bytefmt"
 	"github.com/elastic/go-sysinfo"
-	"github.com/y-yagi/color"
+	"github.com/olekukonko/tablewriter"
 )
 
 type process struct {
@@ -45,9 +46,24 @@ func main() {
 		return sortedProcesses[i].rss > sortedProcesses[j].rss
 	})
 
-	green := color.New(color.FgGreen, color.Bold).SprintFunc()
-	bold := color.New(color.Bold).SprintFunc()
+	data := [][]string{}
 	for _, process := range sortedProcesses {
-		fmt.Printf("%v %v\n", green(process.name), bold(bytefmt.ByteSize(process.rss)))
+		data = append(data, []string{process.name, fmt.Sprintf("%v", bytefmt.ByteSize(process.rss))})
 	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Exe", "Rss"})
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t")
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(data)
+	table.Render()
 }
