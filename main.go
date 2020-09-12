@@ -48,6 +48,6 @@ func main() {
 	green := color.New(color.FgGreen, color.Bold).SprintFunc()
 	bold := color.New(color.Bold).SprintFunc()
 	for _, process := range sortedProcesses {
-		fmt.Printf("%v %v %v\n", green(process.name), bold(bytefmt.ByteSize(process.rss)), bold(bytefmt.ByteSize(process.vsz)))
+		fmt.Printf("%v %v\n", green(process.name), bold(bytefmt.ByteSize(process.rss)))
 	}
 }
